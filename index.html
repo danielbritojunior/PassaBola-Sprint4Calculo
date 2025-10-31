@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Cálculo - Futebol Feminino</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        input[type="number"] {
+            background-color: #374151; border: 1px solid #4b5563; color: #e5e7eb;
+            border-radius: 0.375rem; padding: 0.5rem 0.75rem; width: 100%;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        input[type="number"]:focus {
+            outline: none; border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+        }
+        .result-box {
+            background-color: #1f2937; border: 1px solid #374151;
+            padding: 1rem; border-radius: 0.5rem; text-align: center;
+        }
+        .formula { font-size: 1.125rem; }
+        .table-container { margin-top: 1.5rem; max-height: 180px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #374151; }
+        th { background-color: #374151; color: #d1d5db; position: sticky; top: 0; }
+        td { color: #9ca3af; }
+        tr:last-child td { border-bottom: none; }
+        .toggle-btn { background-color: #374151; color: #d1d5db; border: 1px solid #4b5563; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; transition: all 0.2s; flex-grow: 1; }
+        .toggle-btn.active { background-color: #4f46e5; color: white; border-color: #4f46e5; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-white">Painel Interativo de Cálculo - Futebol Feminino</h1>
+            <p class="text-lg text-gray-400 mt-2">Simulação interativa dos modelos matemáticos do relatório.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- 1. Funções: Crescimento de Seguidores -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+                <h2 class="text-2xl font-bold text-indigo-400 mb-1">1. Funções: Crescimento de Seguidores</h2>
+                <p class="text-gray-400 my-4 text-sm">Modelo exponencial para representar a viralização de conteúdo, onde a taxa de aumento é proporcional ao valor atual.</p>
+                <p class="font-mono text-center bg-gray-900 p-3 rounded-md mb-4 text-emerald-400 formula">f(t) = S₀ · b<sup>t</sup></p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label for="initialFollowers" class="block text-sm mb-1">Seguidores Iniciais (S₀)</label><input id="initialFollowers" type="number" value="5000"></div>
+                    <div><label for="growthBase" class="block text-sm mb-1">Taxa de Crescimento (b)</label><input id="growthBase" type="number" value="1.4" step="0.1"></div>
+                </div>
+                <div class="chart-container mt-4"><canvas id="followerChart"></canvas></div>
+                <div id="followerTableContainer" class="table-container"></div>
+            </div>
+            
+            <!-- 2. Limites: Saturação de Engajamento -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+                <h2 class="text-2xl font-bold text-indigo-400 mb-1">2. Limites: Saturação de Engajamento</h2>
+                <p class="text-gray-400 my-4 text-sm">Modelo que cresce rapidamente e depois desacelera, aproximando-se de um valor máximo (limite).</p>
+                <p class="font-mono text-center bg-gray-900 p-3 rounded-md mb-4 text-emerald-400 formula">f(t) = L · (1 - e<sup>-kt</sup>)</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label for="limitL" class="block text-sm mb-1">Limite Máximo (L)</label><input id="limitL" type="number" value="20000" step="1000"></div>
+                    <div><label for="steepnessK" class="block text-sm mb-1">Taxa de Crescimento (k)</label><input id="steepnessK" type="number" value="0.25" step="0.05"></div>
+                </div>
+                <div class="chart-container mt-4"><canvas id="engagementChart"></canvas></div>
+                <div id="engagementTableContainer" class="table-container"></div>
+            </div>
+
+            <!-- 3. Derivadas: Conceitos -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+                <h2 class="text-2xl font-bold text-indigo-400 mb-1">3. Derivadas</h2>
+                <div class="flex space-x-2 my-2">
+                    <button id="btnVelocity" class="toggle-btn active">Taxa de Variação</button>
+                    <button id="btnVertex" class="toggle-btn">Máximos e Mínimos</button>
+                </div>
+                
+                <!-- Cenário 1: Velocidade -->
+                <div id="derivative-velocity-scenario">
+                    <p class="text-gray-400 my-2 text-sm">A derivada da posição (s(t)) é a velocidade (v(t)), a taxa de variação da posição em um instante.</p>
+                    <p class="font-mono text-center bg-gray-900 p-3 rounded-md mb-4 text-emerald-400 formula">v(t) = v₀ + at</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="initialVelocity" class="block text-sm mb-1">Vel. Inicial (v₀)</label><input id="initialVelocity" type="number" value="2" step="0.5"></div>
+                        <div><label for="acceleration" class="block text-sm mb-1">Aceleração (a)</label><input id="acceleration" type="number" value="1.5" step="0.1"></div>
+                    </div>
+                </div>
+
+                <!-- Cenário 2: Máximos e Mínimos -->
+                <div id="derivative-vertex-scenario" class="hidden">
+                    <p class="text-gray-400 my-2 text-sm">Para achar um pico de desempenho, usamos um modelo quadrático e derivamos para achar o ponto onde a inclinação é zero.<br>
+                        Para encontrarmos o mínimo, deixe o fator cansaço como número positivo.
+                    </p>
+            
+                    <p class="font-mono text-center bg-gray-900 p-3 rounded-md mb-4 text-emerald-400 formula">f(t) = at² + bt + c</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><label for="coeffA" class="block text-sm mb-1 text-center">Cansaço (a)</label><input id="coeffA" type="number" value="-0.8" step="0.1"></div>
+                        <div><label for="coeffB" class="block text-sm mb-1 text-center">Arranque (b)</label><input id="coeffB" type="number" value="8" step="0.5"></div>
+                        <div><label for="coeffC" class="block text-sm mb-1 text-center">Inicial (c)</label><input id="coeffC" type="number" value="5"></div>
+                    </div>
+                    <div class="result-box mt-2">
+                        <p id="vertexTitle" class="text-lg">Ponto de Máximo</p>
+                        <p id="vertexResult" class="text-2xl font-bold text-emerald-400 mt-1">Em t=0, f(t)=0</p>
+                    </div>
+                </div>
+                
+                <div class="chart-container mt-auto"><canvas id="derivativeChart"></canvas></div>
+                <div id="derivativeTableContainer" class="table-container"></div>
+            </div>
+
+            <!-- 4. Integrais: Distância Total Percorrida -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl border border-gray-700 flex flex-col">
+                <h2 class="text-2xl font-bold text-indigo-400 mb-1">4. Integrais: Distância Total Percorrida</h2>
+                <p class="text-gray-400 my-4 text-sm">A integral da velocidade calcula a distância, representando a área sob a curva em um intervalo de tempo.</p>
+                <p class="font-mono text-center bg-gray-900 p-3 rounded-md mb-4 text-emerald-400 formula" style="line-height: 1.5;">D = ∫<sub>t₁</sub><sup>t₂</sup> (v₀ + at) dt</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label for="integralInitialVelocity" class="block text-sm mb-1">Vel. Inicial (v₀)</label><input id="integralInitialVelocity" type="number" value="2" step="0.5"></div>
+                    <div><label for="integralAcceleration" class="block text-sm mb-1">Aceleração (a)</label><input id="integralAcceleration" type="number" value="1.5" step="0.1"></div>
+                    <div><label for="integralStart" class="block text-sm mb-1">Início (t₁)</label><input id="integralStart" type="number" value="0"></div>
+                    <div><label for="integralEnd" class="block text-sm mb-1">Fim (t₂)</label><input id="integralEnd" type="number" value="4"></div>
+                </div>
+                 <div class="result-box mt-4">
+                    <p class="text-lg">Distância Total</p>
+                    <p id="distanceValue" class="text-3xl font-bold text-emerald-400 mt-1">0.00 m</p>
+                </div>
+                <div class="chart-container mt-2"><canvas id="distanceChart"></canvas></div>
+                <div id="distanceTableContainer" class="table-container"></div>
+            </div>
+
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Configuração Global ---
+    const chartConfig = {
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                x: { title: { display: true, color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } },
+                y: { beginAtZero: true, title: { display: true, color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }
+            },
+            plugins: { legend: { labels: { color: '#d1d5db' } } },
+            interaction: { intersect: false, mode: 'index' },
+        },
+    };
+    const addEventListeners = (elements, event, handler) => {
+        elements.forEach(el => el.addEventListener(event, handler));
+    };
+    function generateTable(containerEl, headers, data) {
+        if (!data || data.length === 0) { containerEl.innerHTML = ''; return; }
+        let tableHTML = '<table><thead><tr>';
+        headers.forEach(h => tableHTML += `<th>${h}</th>`);
+        tableHTML += '</tr></thead><tbody>';
+        data.forEach(row => {
+            tableHTML += '<tr>';
+            row.forEach(cell => tableHTML += `<td>${cell}</td>`);
+            tableHTML += '</tr>';
+        });
+        tableHTML += '</tbody></table>';
+        containerEl.innerHTML = tableHTML;
+    }
+
+    // --- 1. Funções: Seguidores ---
+    const followerCtx = document.getElementById('followerChart').getContext('2d');
+    const followerInputs = [document.getElementById('initialFollowers'), document.getElementById('growthBase')];
+    const followerTableContainer = document.getElementById('followerTableContainer');
+    const followerChart = new Chart(followerCtx, {
+        type: 'line', data: { datasets: [{ label: 'Seguidores', borderColor: '#818cf8', backgroundColor: 'rgba(129, 140, 248, 0.2)', fill: true, tension: 0.1 }] },
+        options: { ...chartConfig.options, scales: { ...chartConfig.options.scales, y: { ...chartConfig.options.scales.y, title: { display: true, text: 'Total de Seguidores', color: '#9ca3af' } }, x: { ...chartConfig.options.scales.x, title: { display: true, text: 'Tempo (semanas)', color: '#9ca3af' } } } }
+    });
+    function updateFollowerChart() {
+        const [s0, b] = followerInputs.map(el => parseFloat(el.value));
+        const labels = Array.from({ length: 8 }, (_, i) => i);
+        const data = labels.map(t => s0 * Math.pow(b, t));
+        followerChart.data.labels = labels;
+        followerChart.data.datasets[0].data = data;
+        followerChart.update();
+        const tableData = [0, 1, 2, 3, 4].map(t => [t, (s0 * Math.pow(b, t)).toLocaleString('pt-BR', { maximumFractionDigits: 0 })]);
+        generateTable(followerTableContainer, ['Semana (t)', 'Total de Seguidores'], tableData);
+    }
+    addEventListeners(followerInputs, 'input', updateFollowerChart);
+
+    // --- 2. Limites: Engajamento ---
+    const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+    const engagementInputs = [document.getElementById('limitL'), document.getElementById('steepnessK')];
+    const engagementTableContainer = document.getElementById('engagementTableContainer');
+    const engagementChart = new Chart(engagementCtx, {
+        type: 'line', data: { datasets: [{ label: 'Interações', borderColor: '#f472b6', backgroundColor: 'rgba(244, 114, 182, 0.2)', fill: true, tension: 0.4 }] },
+        options: { ...chartConfig.options, scales: { ...chartConfig.options.scales, y: { ...chartConfig.options.scales.y, title: { display: true, text: 'Total de Interações', color: '#9ca3af' } }, x: { ...chartConfig.options.scales.x, title: { display: true, text: 'Tempo (horas)', color: '#9ca3af' } } } }
+    });
+    function updateEngagementChart() {
+        const [L, k] = engagementInputs.map(el => parseFloat(el.value));
+        const labels = Array.from({ length: 31 }, (_, i) => i);
+        const data = labels.map(t => L * (1 - Math.exp(-k * t)));
+        engagementChart.data.labels = labels;
+        engagementChart.data.datasets[0].data = data;
+        engagementChart.update();
+        const tableData = [0, 4, 8, 12, 24].map(t => [t, (L * (1 - Math.exp(-k * t))).toLocaleString('pt-BR', { maximumFractionDigits: 0 })]);
+        generateTable(engagementTableContainer, ['Hora (t)', 'Total de Interações'], tableData);
+    }
+    addEventListeners(engagementInputs, 'input', updateEngagementChart);
+
+    // --- 3. Derivadas: Cenários ---
+    let derivativeScenario = 'velocity';
+    const derivativeCtx = document.getElementById('derivativeChart').getContext('2d');
+    const derivativeButtons = {
+        velocity: document.getElementById('btnVelocity'),
+        vertex: document.getElementById('btnVertex')
+    };
+    const derivativeScenarios = {
+        velocity: document.getElementById('derivative-velocity-scenario'),
+        vertex: document.getElementById('derivative-vertex-scenario')
+    };
+    
+    const velocityInputs = [document.getElementById('initialVelocity'), document.getElementById('acceleration')];
+    const vertexInputs = [document.getElementById('coeffA'), document.getElementById('coeffB'), document.getElementById('coeffC')];
+    const derivativeTableContainer = document.getElementById('derivativeTableContainer');
+    const vertexResult = document.getElementById('vertexResult');
+    const vertexTitle = document.getElementById('vertexTitle');
+    const derivativeChart = new Chart(derivativeCtx, { type: 'line', data: {}, options: chartConfig.options });
+
+    function updateDerivativeChart() {
+        const chart = derivativeChart;
+        if (derivativeScenario === 'velocity') {
+            const [v0, a] = velocityInputs.map(el => parseFloat(el.value));
+            const func = t => v0 + a * t;
+            const labels = Array.from({ length: 10 }, (_, i) => i);
+            const data = labels.map(func);
+            chart.data = { labels, datasets: [{ label: 'Velocidade', data, borderColor: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.2)', fill: true, tension: 0.1 }] };
+            chart.options.scales.y.beginAtZero = false;
+            chart.options.scales.x.title.text = 'Tempo (segundos)';
+            chart.options.scales.y.title.text = 'Velocidade (m/s)';
+            const tableData = [0, 1, 2, 3, 4].map(t => [t, func(t).toFixed(2)]);
+            generateTable(derivativeTableContainer, ['Segundo (t)', 'Velocidade (m/s)'], tableData);
+        } else { // vertex scenario
+            const [a, b, c] = vertexInputs.map(el => parseFloat(el.value));
+            const func = t => a * t * t + b * t + c;
+            const timeVertex = (a !== 0) ? -b / (2 * a) : 0;
+            const valueVertex = (a !== 0) ? func(timeVertex) : c;
+            const isMax = a < 0;
+            vertexTitle.textContent = isMax ? 'Ponto de Máximo' : 'Ponto de Mínimo';
+            vertexResult.innerHTML = `Em t=${timeVertex.toFixed(1)}, Desempenho=${valueVertex.toFixed(2)}`;
+
+            const chartMaxTime = Math.ceil(timeVertex * 2) + 5;
+            const labels = Array.from({ length: chartMaxTime > 5 ? chartMaxTime : 10 }, (_, i) => i);
+            const data = labels.map(func);
+            chart.data = { labels, datasets: [{ label: 'Nível de Desempenho', data, borderColor: '#34d399', backgroundColor: 'rgba(52, 211, 153, 0.2)', fill: true, tension: 0.1 }] };
+            chart.options.scales.y.beginAtZero = false;
+            chart.options.scales.x.title.text = 'Tempo (minutos)';
+            chart.options.scales.y.title.text = 'Nível de Desempenho';
+            const tableData = labels.slice(0, 6).map(t => [t, func(t).toFixed(2)]);
+            generateTable(derivativeTableContainer, ['Minuto (t)', 'Desempenho'], tableData);
+        }
+        chart.update();
+    }
+    
+    Object.keys(derivativeButtons).forEach(key => {
+        derivativeButtons[key].addEventListener('click', () => {
+            derivativeScenario = key;
+            Object.keys(derivativeScenarios).forEach(scenarioKey => {
+                derivativeScenarios[scenarioKey].classList.toggle('hidden', scenarioKey !== key);
+                derivativeButtons[scenarioKey].classList.toggle('active', scenarioKey === key);
+            });
+            updateDerivativeChart();
+        });
+    });
+    addEventListeners([...velocityInputs, ...vertexInputs], 'input', updateDerivativeChart);
+
+    // --- 4. Integrais: Distância ---
+    const distanceCtx = document.getElementById('distanceChart').getContext('2d');
+    const integralInputs = [document.getElementById('integralInitialVelocity'), document.getElementById('integralAcceleration'), document.getElementById('integralStart'), document.getElementById('integralEnd')];
+    const distanceValue = document.getElementById('distanceValue');
+    const distanceTableContainer = document.getElementById('distanceTableContainer');
+    const distanceChart = new Chart(distanceCtx, {
+        type: 'line', data: { datasets: [
+            { label: 'Velocidade', borderColor: '#facc15', tension: 0.1, fill: false, borderWidth: 3 }, 
+            { label: 'Área da Integral', backgroundColor: 'rgba(250, 204, 21, 0.3)', fill: 'origin', borderWidth: 0, pointRadius: 0 }
+        ]},
+        options: { ...chartConfig.options, scales: { ...chartConfig.options.scales, y: { ...chartConfig.options.scales.y, beginAtZero: false, title: { display: true, text: 'Velocidade (m/s)', color: '#9ca3af' } }, x: { ...chartConfig.options.scales.x, title: { display: true, text: 'Tempo (segundos)', color: '#9ca3af' } } } }
+    });
+    function updateIntegralChart() {
+        const [v0, a, t1, t2] = integralInputs.map(el => parseFloat(el.value));
+        const velocityFunc = t => v0 + a * t;
+        const integral = t => v0 * t + 0.5 * a * t * t;
+        const distance = integral(t2) - integral(t1);
+        distanceValue.textContent = `${distance.toFixed(2)} m`;
+
+        const chartMaxTime = Math.max(t2, 10);
+        const labels = Array.from({ length: Math.ceil(chartMaxTime) + 1 }, (_, i) => i);
+        const velocityData = labels.map(velocityFunc);
+        const areaData = labels.map(t => (t >= t1 && t <= t2) ? velocityFunc(t) : null);
+        distanceChart.data.labels = labels;
+        distanceChart.data.datasets[0].data = velocityData;
+        distanceChart.data.datasets[1].data = areaData;
+        distanceChart.update();
+        
+        const tableData = [0,1,2,3,4].map(t => [t, velocityFunc(t).toFixed(1)]);
+        generateTable(distanceTableContainer, ['Segundo (t)', 'Velocidade (m/s)'], tableData);
+    }
+    addEventListeners(integralInputs, 'input', updateIntegralChart);
+    
+    // --- Chamadas Iniciais ---
+    updateFollowerChart();
+    updateEngagementChart();
+    updateDerivativeChart();
+    updateIntegralChart();
+});
+</script>
+</body>
+</html>
+
