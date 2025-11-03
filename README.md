@@ -1,6 +1,6 @@
 # ⚽ Projeto "Passa a Bola" - Painel Interativo de Cálculo
 
-[cite_start]Este repositório contém o código-fonte de um painel interativo (dashboard) desenvolvido para o Challenge "Passa a Bola" da disciplina de *Differentiated Problem Solving* (FIAP).
+Este repositório contém o código-fonte de um painel interativo (dashboard) desenvolvido para o Challenge "Passa a Bola" da disciplina de *Differentiated Problem Solving* (FIAP).
 
 O objetivo deste painel é demonstrar visualmente como conceitos fundamentais do Cálculo (Funções, Limites, Derivadas e Integrais) podem ser aplicados para analisar fenômenos do futebol feminino, tanto dentro de campo (performance atlética) quanto fora dele (engajamento digital).
 
