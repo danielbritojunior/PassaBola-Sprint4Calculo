@@ -55,6 +55,6 @@ Todas as dependências (Tailwind e Chart.js) são carregadas via CDN, então nã
 
 Este projeto foi desenvolvido por:
 
-* [cite_start]Daniel Brito dos Santos Junior (RM: 566236) 
-* [cite_start]Vitor Rampazzi Franco (RM: 562270) 
-* [cite_start]Gustavo Palomares Borsato (RM: 564621) 
+* Daniel Brito dos Santos Junior (RM: 566236) 
+* Vitor Rampazzi Franco (RM: 562270) 
+* Gustavo Palomares Borsato (RM: 564621) 
